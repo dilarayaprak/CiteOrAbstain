@@ -1,0 +1,35 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# ===== Virtual environment =====
+venv/
+.venv/
+
+# ===== Secrets (API keys) =====
+.env
+.streamlit/secrets.toml
+
+# ===== Jupyter =====
+.ipynb_checkpoints/
+
+# ===== Vector database (generated, can be rebuilt) =====
+chroma_db/
+vectorstore/
+
+# ===== Models and large files =====
+models/
+*.bin
+*.safetensors
+*.gguf
+
+# ===== Editors and OS =====
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ===== Logs =====
+*.log
