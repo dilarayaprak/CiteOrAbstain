@@ -1,0 +1,30 @@
+# CiteOrAbstain - Literature Review Matrix (10 Core Papers)
+
+This document provides a structured literature review of 10 foundational papers directly guiding the design, implementation, and evaluation of the **CiteOrAbstain** patient question-answering assistant.
+
+---
+
+## Literature Overview Table
+
+| # | Paper Title & Authors | Venue / Year | Core Problem / Research Question | Methodology / Key Technique | Relevance to CiteOrAbstain |
+|---|---|---|---|---|---|
+| **1** | **Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks**<br>*(Lewis et al.)* | NeurIPS 2020 | LLMs hallucinate factual knowledge and cannot update knowledge dynamically without retraining. | Combines a dense retriever (DPR) with a pre-trained sequence-to-sequence model (BART) to condition generation on retrieved passages. | **Foundational Architecture:** Defines our core RAG framework (retrieving NHS/MedlinePlus passages to generate answers). |
+| **2** | **RAGAS: Automated Evaluation of Retrieval Augmented Generation**<br>*(Es et al.)* | EACL 2024 | Evaluating RAG systems end-to-end without ground-truth reference texts is difficult and costly. | Evaluates RAG pipelines across 3 dimensions: *Faithfulness* (groundedness), *Answer Relevance*, and *Context Precision*. | **Evaluation Pipeline:** Directly maps to our evaluation script measuring whether the generated answer is faithful to retrieved passages. |
+| **3** | **Enabling Large Language Models to Generate Text with Citations (ALCE)**<br>*(Gao et al.)* | EMNLP 2023 | LLMs often generate plausible claims but fail to provide faithful, verifiable citations to supporting documents. | Benchmarks citation generation; introduces metrics for *Citation Precision* (claim supported by passage) and *Citation Recall*. | **Citation Correctness Metric:** Serves as the direct benchmark for our project requirement: *"Does the cited passage really contain the answer?"* |
+| **4** | **Knowing When to Ask and When to Answer: Calibrating LLMs with Abstention**<br>*(Yin et al.)* | Findings of ACL 2023 | Models produce confident hallucinations when queried about unknown or out-of-distribution topics. | Explores selective prediction and confidence calibration to enable models to abstain (*"I don't know"*) when uncertainty is high. | **Similarity Threshold & Refusal:** Informs our retrieval score threshold for triggering abstention when questions fall outside knee documents. |
+| **5** | **A Survey on Hallucination in Large Language Models: Principles, Taxonomy, Challenges**<br>*(Huang et al.)* | IEEE TKDE 2024 | Systematic classification of why LLMs generate factually incorrect or ungrounded statements. | Taxonomizes hallucination into factual inconsistency, input-conflicting, and context-conflicting hallucinations. | **System Guardrails:** Provides theoretical backing for why unconstrained generation is strictly prohibited in surgical patient care. |
+| **6** | **Evaluating Large Language Models on Medical Question Answering (Med-PaLM)**<br>*(Singhal et al.)* | Nature 2023 | General LLMs can provide misleading clinical advice without rigorous medical safety guardrails. | Human clinical evaluation assessing scientific consensus, potential patient harm, and selective refusal in medical queries. | **Safety & Rule-Based Refusal:** Justifies our hard refusal rules for emergency symptoms (DVT, PE) and medication dosing questions. |
+| **7** | **Retrieval-Augmented Generation for Large Language Models: A Survey**<br>*(Gao et al.)* | arXiv 2024 | Comparative analysis of Naive RAG, Advanced RAG, and Modular RAG paradigms. | Details chunking strategies, embedding comparisons, and vector indexing (ChromaDB vs. pgvector). | **Implementation Choices:** Guides our document splitting (chunk size/overlap) and embedding pipeline. |
+| **8** | **Dense Passage Retrieval for Open-Domain Question Answering (DPR)**<br>*(Karpukhin et al.)* | EMNLP 2020 | Traditional sparse retrieval (BM25) fails to capture semantic meaning and patient terminology variations. | Uses dual-encoder architectures (Sentence-Transformers) to map queries and documents into a shared dense semantic vector space. | **Vector Search Component:** Forms the theoretical basis of our sentence-transformer embedding model in ChromaDB. |
+| **9** | **The Over-Refusal Dilemma in Safety-Tuned LLMs**<br>*(Zhang et al.)* | ACL 2024 | Safety-tuned models often over-refuse harmless queries that superficially resemble sensitive topics. | Analyzes the sensitivity-safety trade-off in prompt-based and alignment-based refusal mechanisms. | **Threshold Tuning:** Guides Milestone 4 analysis comparing correct answer rate vs. correct refusal rate across varying thresholds. |
+| **10** | **AttrEval: A Unified Benchmark for Fine-Grained Attributable Text Generation**<br>*(Yue et al.)* | EMNLP 2023 | Automatic verification of whether generated sentences are fully attributable to specific reference passages. | Proposes sentence-level attribution labeling and automated fact-checking models for text-passage verification. | **Citation Validation Script:** Informs the structure of our evaluation table and labelling schema for both student reviewers. |
+
+---
+
+## Key Methodological Takeaways for CiteOrAbstain
+
+1. **Retrieval Grounding:** As established by Lewis et al. and Gao et al., generating answers without passage retrieval leads to unacceptable hallucination risks in healthcare contexts.
+2. **Two-Stage Refusal Strategy:**
+   - *Stage 1 (Rule-Based):* Hard regex/keyword guardrails for medication doses and medical emergencies (as highlighted by Med-PaLM safety guidelines).
+   - *Stage 2 (Threshold-Based):* Abstaining via semantic similarity scores when the top-retrieved chunk falls below the threshold (Yin et al., Zhang et al.).
+3. **Rigorous Evaluation Framework:** Following RAGAS and ALCE, evaluation must strictly separate *Answer Correctness*, *Citation Precision*, and *Refusal Rate*.
